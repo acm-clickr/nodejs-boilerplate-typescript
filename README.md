@@ -9,14 +9,24 @@ This is a boilerplate for a Node.js application using Express and TypeScript.
 - Node.js (v18 or higher recommended)
 - npm or yarn
 
-### Installation
+### How to Use This Template
 
-1.  Download and extract the boilerplate (or use it as a template on GitHub).
-2.  Navigate to the project directory:
+1.  **Create a new repository from this template:**
+    Click the `Use this template` button at the top of the repository's page on GitHub. This will create a new repository in your own GitHub account with a copy of all the files.
+
+2.  **Clone your new repository:**
+    Replace `<your-new-repository-url>` with the URL of the repository you just created.
     ```bash
-    cd node-js-boilerplate
+    git clone <your-new-repository-url>
     ```
-3.  Install dependencies:
+
+3.  **Navigate to the project directory:**
+    Replace `<your-new-repository-name>` with the name of your new repository.
+    ```bash
+    cd <your-new-repository-name>
+    ```
+
+4.  **Install dependencies:**
     ```bash
     npm install
     ```
