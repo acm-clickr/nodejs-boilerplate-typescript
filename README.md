@@ -60,7 +60,7 @@ This boilerplate includes several security middleware packages to protect your a
 
 These are enabled by default in `src/app.ts`.
 
-
+## How to Add a New Route
 
 Follow these steps to add a new feature endpoint. The project includes a complete CRUD example for a `/products` endpoint which you can use as a reference.
 
@@ -181,17 +181,15 @@ When creating a controller, use this interface as the type for the `Response` ob
 
 For a successful request, set `success` to `true`, provide a relevant message, and include the payload in the `data` property.
 
-**Example: Returning a list of products**
+**Example: `GET /api/products`**
 
 ```typescript
-// ... imports and interface definitions
+// From src/api/controllers/products.ts
 export const getProducts = (req: Request, res: Response<ApiResponse<Product[]>>) => {
-  const products: Product[] = [{ id: 1, name: 'Laptop' }];
-
-  return res.status(200).json({
+  res.status(200).json({
     success: true,
     message: 'Products retrieved successfully.',
-    data: products,
+    data: products, // where products is of type Product[]
   });
 };
 ```
@@ -200,13 +198,13 @@ export const getProducts = (req: Request, res: Response<ApiResponse<Product[]>>)
 
 For a failed request, set `success` to `false`, provide a clear error message, and set `data` to `null`. Always return an appropriate HTTP status code (e.g., 400, 404, 500).
 
-**Example: Handling a "Not Found" error**
+**Example: `GET /api/products/:id` (Not Found)**
 
 ```typescript
-// ... imports and interface definitions
+// From src/api/controllers/products.ts
 export const getProductById = (req: Request, res: Response<ApiResponse<Product | null>>) => {
-  const { id } = req.params;
-  const product = findProduct(id); // Your logic to find the product
+  const id = parseInt(req.params.id, 10);
+  const product = products.find((p) => p.id === id);
 
   if (!product) {
     return res.status(404).json({
@@ -215,11 +213,104 @@ export const getProductById = (req: Request, res: Response<ApiResponse<Product |
       data: null,
     });
   }
-
   // ... success case
 };
 ```
 
-
-
 ## Database Integration
+
+The project is set up to use environment variables for database configurations. Add your database connection strings to the `.env` file.
+
+### Connecting to MongoDB
+
+1.  **Install Mongoose:**
+    ```bash
+    npm install mongoose
+    ```
+2.  **Add Connection String to `.env`:**
+    ```
+    MONGO_URI=mongodb://localhost:27017/mydatabase
+    ```
+3.  **Create a Database Config File:**
+    Create a file like `src/config/database.ts` to handle the connection.
+
+    **`src/config/database.ts`**
+    ```typescript
+    import mongoose from 'mongoose';
+
+    const connectDB = async () => {
+      try {
+        await mongoose.connect(process.env.MONGO_URI as string);
+        console.log('MongoDB connected successfully.');
+      } catch (error) {
+        console.error('MongoDB connection error:', error);
+        process.exit(1); // Exit process with failure
+      }
+    };
+
+    export default connectDB;
+    ```
+4.  **Initialize the Connection:**
+    Call the `connectDB` function in your main application file, `src/app.ts`.
+
+    **`src/app.ts`**
+    ```typescript
+    // ... other imports
+    import connectDB from './config/database';
+
+    // Connect to the database
+    connectDB();
+
+    const app = express();
+    // ... rest of the file
+    ```
+
+### Connecting to PostgreSQL
+
+1.  **Install `pg` driver:**
+    ```bash
+    npm install pg
+    npm install -D @types/pg
+    ```
+2.  **Add Connection String to `.env`:**
+    ```
+    PG_URI=postgres://user:password@host:port/database
+    ```
+3.  **Create a Database Config File:**
+    Create a file like `src/config/database.ts` (or modify the existing one).
+
+    **`src/config/database.ts`**
+    ```typescript
+    import { Pool } from 'pg';
+
+    const pool = new Pool({
+      connectionString: process.env.PG_URI,
+    });
+
+    pool.on('connect', () => {
+      console.log('PostgreSQL connected successfully.');
+    });
+
+    pool.on('error', (err) => {
+      console.error('PostgreSQL connection error:', err);
+      process.exit(1);
+    });
+
+    export default pool;
+    ```
+4.  **Use the Connection Pool:**
+    You can now import the `pool` object in your controllers or services to query the database.
+
+    **Example Query in a Controller:**
+    ```typescript
+    import pool from '../../config/database';
+
+    export const getProducts = async (req: Request, res: Response) => {
+      try {
+        const result = await pool.query('SELECT * FROM products');
+        res.status(200).json(result.rows);
+      } catch (error) {
+        res.status(500).json({ message: 'Error fetching products' });
+      }
+    };
+    ```
