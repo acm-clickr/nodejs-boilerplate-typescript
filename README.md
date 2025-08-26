@@ -49,7 +49,18 @@ This is a boilerplate for a Node.js application using Express and TypeScript.
     ```
     The server will be running on the port specified in your `.env` file or on port 3000 by default.
 
-## How to Add a New Route
+## Security
+
+This boilerplate includes several security middleware packages to protect your application:
+
+-   **`helmet`**: Sets various HTTP headers to help secure your Express apps.
+-   **`cors`**: Enables Cross-Origin Resource Sharing with various options.
+-   **`express-mongo-sanitize`**: Sanitizes user-supplied data to prevent MongoDB operator injection.
+-   **`xss-clean`**: Sanitizes user input to prevent Cross-Site Scripting (XSS) attacks.
+
+These are enabled by default in `src/app.ts`.
+
+
 
 Follow these steps to add a new feature endpoint. The project includes a complete CRUD example for a `/products` endpoint which you can use as a reference.
 
@@ -211,98 +222,4 @@ export const getProductById = (req: Request, res: Response<ApiResponse<Product |
 
 
 
-The project is set up to use environment variables for database configurations. Add your database connection strings to the `.env` file.
-
-### Connecting to MongoDB
-
-1.  **Install Mongoose:**
-    ```bash
-    npm install mongoose
-    ```
-2.  **Add Connection String to `.env`:**
-    ```
-    MONGO_URI=mongodb://localhost:27017/mydatabase
-    ```
-3.  **Create a Database Config File:**
-    Create a file like `src/config/database.ts` to handle the connection.
-
-    **`src/config/database.ts`**
-    ```typescript
-    import mongoose from 'mongoose';
-
-    const connectDB = async () => {
-      try {
-        await mongoose.connect(process.env.MONGO_URI as string);
-        console.log('MongoDB connected successfully.');
-      } catch (error) {
-        console.error('MongoDB connection error:', error);
-        process.exit(1); // Exit process with failure
-      }
-    };
-
-    export default connectDB;
-    ```
-4.  **Initialize the Connection:**
-    Call the `connectDB` function in your main application file, `src/app.ts`.
-
-    **`src/app.ts`**
-    ```typescript
-    // ... other imports
-    import connectDB from './config/database';
-
-    // Connect to the database
-    connectDB();
-
-    const app = express();
-    // ... rest of the file
-    ```
-
-### Connecting to PostgreSQL
-
-1.  **Install `pg` driver:**
-    ```bash
-    npm install pg
-    npm install -D @types/pg
-    ```
-2.  **Add Connection String to `.env`:**
-    ```
-    PG_URI=postgres://user:password@host:port/database
-    ```
-3.  **Create a Database Config File:**
-    Create a file like `src/config/database.ts` (or modify the existing one).
-
-    **`src/config/database.ts`**
-    ```typescript
-    import { Pool } from 'pg';
-
-    const pool = new Pool({
-      connectionString: process.env.PG_URI,
-    });
-
-    pool.on('connect', () => {
-      console.log('PostgreSQL connected successfully.');
-    });
-
-    pool.on('error', (err) => {
-      console.error('PostgreSQL connection error:', err);
-      process.exit(1);
-    });
-
-    export default pool;
-    ```
-4.  **Use the Connection Pool:**
-    You can now import the `pool` object in your controllers or services to query the database.
-
-    **Example Query in a Controller:**
-    ```typescript
-    import pool from '../../config/database';
-
-    export const getProducts = async (req: Request, res: Response) => {
-      try {
-        const result = await pool.query('SELECT * FROM products');
-        res.status(200).json(result.rows);
-      } catch (error) {
-        res.status(500).json({ message: 'Error fetching products' });
-      }
-    };
-    ```
+## Database Integration
