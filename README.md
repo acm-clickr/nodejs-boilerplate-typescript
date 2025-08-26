@@ -11,10 +11,7 @@ This is a boilerplate for a Node.js application using Express and TypeScript.
 
 ### Installation
 
-1.  Clone the repository:
-    ```bash
-    git clone git@github.com:acm-clickr/nodejs-boilerplate-typescript.git
-    ```
+1.  Download and extract the boilerplate (or use it as a template on GitHub).
 2.  Navigate to the project directory:
     ```bash
     cd node-js-boilerplate
